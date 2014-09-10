@@ -1,0 +1,56 @@
+{
+   "abstract" : "run shell commands with enhanced support",
+   "author" : [
+      "Sullivan Beck <sbeck@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.4205",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Shell-Cmd",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0.21"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.21"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Capture::Tiny" : "0",
+            "Net::OpenSSH" : "0",
+            "Parallel::ForkManager" : "0",
+            "perl" : "5.008"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "IO::File" : "0",
+            "Test::Inter" : "0",
+            "Test::More" : "0"
+         }
+      }
+   },
+   "provides" : {
+      "Shell::Cmd" : {
+         "file" : "lib/Shell/Cmd.pm",
+         "version" : "2.02"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "2.02"
+}

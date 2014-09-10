@@ -1,0 +1,47 @@
+Written by:
+   Sullivan Beck (sbeck@cpan.org)
+Any suggestions, bug reports, or donations :-) should be sent to me.
+
+1.00  2013-09-13
+   - Initial release.
+
+1.10  2013-10-30
+   - Better handling of 'flow' lines.
+   - Rewrite of script generating lines to be much cleaner.
+   - Several new options:
+      global options: failure, simple
+      per-command options: noredir, retry, sleep
+
+1.11  2013-10-31
+   - Replaced 'declare' with a more standard way of doing arithmetic
+     since declare broke on several systems.
+   - Changed HISTORY file to new Changes specification.  Suggested by
+     RT 89910.
+
+1.12  2013-12-06
+   - New options:
+      ssh_sleep, check
+
+2.00  2014-03-06
+   - Significant rewrite including several backwards incompatible
+     changes.
+        changed script generating routines to be cleaner
+        generated script is now simpler to read
+   - Bug where exit code wasn't getting set correctly by script
+   - Change several options including:
+       changed 'run' option to 'mode'
+       changed 'f-output' values to not start with 'f-':
+       changed 'simple' to 'script' and adjusted meaning
+       changed 'echo' option (no longer applies to 'script' mode)
+       changed 'failure' option slightly (no longer refers to 'simple' option)
+   - Output of running in script mode changed (in a backward incompatible way)
+   - The dire/env methods can now query current values
+   - Added mode method
+
+2.01  2014-04-03
+   - Updated example files for 2.xx (forgot to do then when 2.00 was released)
+   - Fixed a bug where the dire option was getting lowercased
+   - Some simple fixes to avoid a warning and unwanted blank lines
+
+2.02  2014-05-22
+   - Fixed a bug where script output was not getting handled correctly
