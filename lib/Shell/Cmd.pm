@@ -13,7 +13,7 @@ use Net::OpenSSH;
 use Parallel::ForkManager 0.7.6;
 
 our($VERSION);
-$VERSION = "2.02";
+$VERSION = "2.03";
 
 $| = 1;
 
