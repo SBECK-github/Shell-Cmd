@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Sullivan Beck. All rights reserved.
+# Copyright (c) 2013-2015 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -16,14 +16,14 @@ Shell::Cmd - run shell commands with enhanced support
 
 =head1 DESCRIPTION
 
-A very comman use of perl is to act as a wrapper around shell commands
+A very common use of perl is to act as a wrapper around shell commands
 where it is used to prepare the shell commands, execute them, and deal
 with the resulting output.  Even where the bulk of the work is actually
 done in the perl script, creating small shell scripts within it to do
 some portion of the task is common.
 
 In the simplest form, running shell commands can be done very simply
-using the system() call, backticks, or several other ways, but I
+using the C<system()> call, backticks, or several other ways, but I
 usually find myself wanting to do a bit (and sometimes a lot) more,
 especially when I am writing a long-term script that I want to be
 robust.  In these cases, I frequently ended up writing a subroutine to
@@ -33,27 +33,80 @@ This module is designed to take a list of shell commands and
 automatically turn them into a shell script (using only basic shell
 commands) which adds some common desirable functionality including:
 
-   o  Keeping or discarding STDOUT and STDERR (in any
-      combination).
-   o  Echoing commands as they are run if desired.
-   o  Dry-run mode where the shell script is created and
-      returned, but not actually run.
-   o  Error trapping and handling at a per-command level
-      even though all of the commands are run in a
-      single shell.
-   o  Setting up environment variables for the commands.
-   o  Alternate commands that do the same thing so that you
-      can run the scripts more easily on multiple platforms.
-   o  Running the commands locally, or via. ssh on a remote
-      host (or hosts).
-   o  When running via ssh on multiple hosts, support serial
-      or parallel execution.
-   o  Handle quotes, dollar signs, etc. correctly, especially
-      when passing the command to ssh.
+=over 4
+
+=item Handle STDOUT/STDERR
+
+Commonly, I want to treat STDOUT and STDERR in some way.  I may want to
+keep one or both of them, or discard one or both of them, or merge them.
+
+=item Command echoing
+
+A common option I want to set is command echoing where the commands
+I run are echoed as they are run.  I want to be able to easily turn this
+on or off.
+
+=item Dry-run
+
+Another common option is to create a dry-run environment where the shell
+commands may be printed, but not actually run.  Again, I want to be able
+to turn this on and off easily.
+
+=item Error trapping
+
+Even though I may combine a number of shell commands into a single script
+(so that it all runs in one shell), I still want to have built in
+error trapping at a per-command basis.  I want to take a series of
+commands and know exactly which one failed.  I also want to be able
+to control what happens to commands that are listed after a failed
+command.  I may want to continue to run them.  I may want to just
+list them so I can see what didn't get completed.
+
+=item Shell environment
+
+I sometimes want to set up some environment for the script such as what
+directory it will be run in and what environment variables should be set
+in advance.
+
+=item Command alternates
+
+Sometimes, especially if you are running the script on multiple
+platforms, you may not know which command you should use.  You can
+of course generate a platform specific script, but an alternative is
+to specify alternate commands.  If ANY of those commands succeed,
+then that portion of the script succeeds.
+
+=item Command retrying
+
+Occasionally you have a command that may fail, but on retrying, it will
+succeed.  This is especially true when some effect from a previous command
+takes some amount of time to actually go into effect.  By allowing a certain
+number of retries, you can often work around this situation.
+
+=item Remote execution
+
+Sometimes you want to run the commands locally.  Other times, you want to
+run it remotely using ssh.  When running remotely, you may want to run the
+same script on multiple hosts.
+
+=item SSH handling
+
+When running on multiple hosts using SSH, sometimes you need to run the
+script serially (i.e. one host at a time), but other times, it would be
+nice to run it in parallel to speed up execution.  When running in
+parallel, you can specify how many instances to run at at time.
+
+=item Quoting and special characters
+
+Since shell commands often have quotes, dollar signs, and other special
+characters, this module can handle that for you by properly escaping them
+as necessary.
+
+=back
 
 This module is designed to run multiple commands in a single shell,
 wrapping them in very simple, standard shell commands to automatically
-add this functionality.
+add all of this functionality.
 
 =head1 METHODS
 
@@ -78,7 +131,7 @@ Returns the version of this module.
 This is used to add one or more commands to the list of commands that
 will be executed.
 
-Here, each $cmd is a string containing a command, or a listref where each
+Here, each C<$cmd> is a string containing a command, or a listref where each
 element in the list is a command.
 
 In the listref form, the list of commands are alternates to try until
@@ -99,13 +152,13 @@ fail if all three alternates fail.
 
 Each command (or list of alternates) can have options passed in.
 These options apply only to this command (or list), and are described
-in the PER-COMMAND OPTIONS section below.
+in the L</"PER-COMMAND OPTIONS"> section below.
 
-All of the commands stored in $obj will be run in a single shell, so
+All of the commands stored in C<$obj> will be run in a single shell, so
 it is fine to gather information in one command and store it in a
 shell variable for use in a later command.  Also, it is not necessary
 (or desirable) to include a trailing semi-colon on the command as
-these will be added automatically where appropriate.
+these will be added automatically as needed.
 
 An error is returned if any of the arguments are invalid.
 
@@ -122,19 +175,21 @@ the commands can be run, and these are described in the B<options> method
 below.  The most important option is the B<mode> option which sets the mode
 which determines the form of the script, and how it is run.
 
-If $obj is in 'run' mode, the method can be called as either:
+If C<$obj> is in 'run' mode, the method can be called as either:
 
    ($err)    = $obj->run();
    $err      = $obj->run();
 
 In this mode, the script is run, and output is sent directly to STDOUT
 and STDERR as appropriate for the options specified.  In essence, this
-generates a script and runs it with the system() call.
+generates a script and runs it with the C<system()> call.
 
-The return value of the method is the exit code of the script (which
-is the exit code of the first failing command).
+If a temporary script file is used, but it cannot be written, $err
+will be -2.  Otherwise, the return value of the method is the exit
+code of the script (which is the exit code of the first failing
+command).
 
-If $obj is in 'dry-run' mode, the method should be called as either:
+If C<$obj> is in 'dry-run' mode, the method should be called as either:
 
    ($script) = $obj->run();
    $script   = $obj->run();
@@ -143,12 +198,12 @@ In this mode, the commands are not actually executed.  Instead, the
 script is built and returned.  The form of the script is determined
 by the B<script> option described below.
 
-If $obj is in 'script' mode, the output from the commands are kept for
+If C<$obj> is in 'script' mode, the output from the commands are kept for
 further analysis.  The method should be called as:
 
    @out      = $obj->run();
 
-Here, @out is a list of command output descriptors:
+Here, C<@out> is a list of command output descriptors:
 
    @out      = ( FAILED_COMMAND, COMMAND_SUMMARY_1, COMMAND_SUMMARY_2, ... )
 
@@ -226,7 +281,7 @@ listrefs of lines.
    $obj->ssh(@hosts);
 
 This behaves similar to the run method except it will run the commands on
-each host in @hosts using ssh.
+each host in C<@hosts> using ssh.
 
 In 'dry-run' mode, the call is:
 
@@ -240,21 +295,25 @@ In 'script' mode, the call is:
 
    ($out1,$out2,...) = $obj->ssh(@hosts);
 
-where $out1 is a reference to the list of output on the 1st host, etc.
+where C<$out1> is a reference to the list of output on the 1st host, etc.
 
 Note that when running in parallel in 'run' mode, the output that is
 printed to the terminal will be a mix of the output from each of the
 hosts the commands are being run on.
 
+If the B<tmp_script> option is set but the file cannot be written,
+the return value in both cases will be (-2).  If the file cannot
+be copied to a host, then the return value for that host will be -3.
+
 =item B<flush>
 
    $obj->flush( [@opts] );
 
-If @opts is not given, it removes the commands, directory, and
+If C<@opts> is not given, it removes the commands, directory, and
 environment stored in the object, and resets the options to the default
 values.
 
-If @opts is given, it can include any of the following:
+If C<@opts> is given, it can include any of the following:
 
    commands   : clears commands
    dire       : clears the directory
@@ -266,7 +325,7 @@ If @opts is given, it can include any of the following:
    $err = $obj->dire($dire);
 
 This method is used to set the B<dire> option.  For a description, please
-see the entry in GLOBAL OPTIONS below.
+see the entry in L</"GLOBAL OPTIONS"> below.
 
 You can also check the value that is set using:
 
@@ -277,7 +336,7 @@ You can also check the value that is set using:
    $err = $obj->mode($mode);
 
 This method is used to set the B<mode> option.  For a description, please
-see the entry in GLOBAL OPTIONS below.
+see the entry in L</"GLOBAL OPTIONS"> below.
 
 You can also check the value that is set using:
 
@@ -288,7 +347,7 @@ You can also check the value that is set using:
    $obj->env(VAR, VAL, VAR, VAL, ...);
 
 This can be called any number of times to set some environment
-variables.  If $val is undef, the environment variable will be
+variables.  If C<$val> is undef, the environment variable will be
 explicitly unset.
 
 You can also query the environment variables with:
@@ -309,7 +368,7 @@ The hash is of the form:
    %options = ( OPTION => VALUE,
                 OPTION => VALUE, ...)
 
-The options are defined in the GLOBAL OPTIONS section below.
+The options are defined in the L</"GLOBAL OPTIONS"> section below.
 
 =back
 
@@ -346,6 +405,31 @@ failed.
 
 The B<mode> option can also be set using the B<mode> method.
 
+=item B<tmp_script, tmp_script_keep>
+
+The B<tmp_script> option is used to specify a temporary script name.
+
+The script that is generated by this module may exceed the length of a
+string that can be passed directly to a shell.  In order to avoid this
+problem, the script can be stored in a temporary script file (set with
+the B<tmp_script> option) which will be executed.
+
+Once execution is complete, the temporary script file will be removed
+unless the B<tmp_script_keep> option is set.
+
+=item B<ssh_script, ssh_script_keep>
+
+These are related to the B<tmp_script> and B<tmp_script_keep> options.
+If B<tmp_script> is created, then when the B<ssh> method is used to
+run the script remotely, it is copied to the remote host (via. scp)
+to a temporary location (given by B<ssh_script>).  The remote script
+is then removed (unless B<ssh_script_keep> is passed in).
+
+If B<tmp_script> is set but B<ssh_script> is NOT, B<ssh_script>
+defaults to the same value as B<tmp_script>.
+
+B<ssh_script_keep> defaults to 0, even if B<tmp_script_keep> is set.
+
 =item B<dire>
 
 The B<dire> option is use to specify the directory where all of the the
@@ -373,7 +457,7 @@ In the 'run' mode, these determine what output will be displayed.
 It can display only STDOUT, only STDERR, or both, or both can be
 discarded with the 'quiet' option.  The default is to include 'both'.
 The 'merged' option is used to display both but merge STDERR into
-STDOUT (using a 2>&1 redirection).
+STDOUT (using a C<2E<gt>&1> redirection).
 
 The default in both cases is 'both'.
 

@@ -1,5 +1,5 @@
 package Shell::Cmd;
-# Copyright (c) 2013-2014 Sullivan Beck. All rights reserved.
+# Copyright (c) 2013-2015 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -11,6 +11,7 @@ use strict;
 use Capture::Tiny qw(capture capture_stdout capture_stderr);
 use Net::OpenSSH;
 use Parallel::ForkManager 0.7.6;
+use IO::File;
 
 our($VERSION);
 $VERSION = "2.03";
@@ -48,16 +49,21 @@ sub flush {
    $$self{'env'}      = []        if ($all  ||  $opts{'env'});
 
    if ($all  ||  $opts{'opts'}) {
-      $$self{'mode'}      = 'run';
-      $$self{'output'}    = 'both';
-      $$self{'f-output'}  = 'both';
-      $$self{'script'}    = '';
-      $$self{'echo'}      = 'noecho';
-      $$self{'failure'}   = 'exit';
+      $$self{'mode'}            = 'run';
+      $$self{'output'}          = 'both';
+      $$self{'f-output'}        = 'both';
+      $$self{'script'}          = '';
+      $$self{'echo'}            = 'noecho';
+      $$self{'failure'}         = 'exit';
 
-      $$self{'ssh_opts'}  = {};
-      $$self{'ssh_num'}   = 1;
-      $$self{'ssh_sleep'} = 0;
+      $$self{'tmp_script'}      = '';
+      $$self{'tmp_script_keep'} = 0;
+      $$self{'ssh_script'}      = '';
+      $$self{'ssh_script_keep'} = 0;
+
+      $$self{'ssh_opts'}        = {};
+      $$self{'ssh_num'}         = 1;
+      $$self{'ssh_sleep'}       = 0;
    }
 
    # [ [CMD, %OPTS], [CMD, %OPTS], ... ]
@@ -143,8 +149,16 @@ sub options {
          $$self{'ssh_opts'}{$opt} = $val;
          next OPT;
 
-      } elsif ($opt eq 'ssh_num' ||
+      } elsif ($opt eq 'ssh_num'    ||
                $opt eq 'ssh_sleep'
+              ) {
+         $$self{$opt} = $val;
+         next OPT;
+
+      } elsif ($opt eq 'tmp_script'       ||
+               $opt eq 'tmp_script_keep'  ||
+               $opt eq 'ssh_script'       ||
+               $opt eq 'ssh_script_keep'
               ) {
          $$self{$opt} = $val;
          next OPT;
@@ -231,9 +245,33 @@ sub run {
    # If it's running in real-time, do so.
    #
 
+   my $tmp_script = $$self{'tmp_script'};
+   if ($tmp_script) {
+      my $out = new IO::File;
+
+      if ($out->open("> $tmp_script")) {
+         print $out $script;
+         $out->close();
+         $script = ". $tmp_script";
+      } else {
+         my $err = -2;
+         if (wantarray) {
+            return ($err);
+         }
+         return $err;
+      }
+   }
+
+   my $err;
    if ($$self{'mode'} eq 'run') {
       system("$script");
-      my $err = $?;
+      $err = $?;
+
+      if ($tmp_script  &&
+          ! $$self{'tmp_script_keep'}) {
+         unlink($tmp_script);
+      }
+
       if (wantarray) {
          return ($err);
       }
@@ -258,6 +296,11 @@ sub run {
       $capt_exit = $?;
    }
    $capt_exit = $capt_exit >> 8;
+
+   if ($tmp_script  &&
+       ! $$self{'tmp_script_keep'}) {
+      unlink($tmp_script);
+   }
 
    #
    # Parse the output and return it.
@@ -297,6 +340,25 @@ sub ssh {
    #
    # Run the script on each host.
    #
+
+   my $tmp_script = $$self{'tmp_script'};
+   if ($tmp_script) {
+      my $f   = $$self{'ssh_script'}  ||  $tmp_script;
+      my $out = new IO::File;
+
+      if ($out->open("> $tmp_script")) {
+         print $out $script;
+         $out->close();
+         $script = ". $f";
+
+      } else {
+         my $err = -2;
+         if (wantarray) {
+            return ($err);
+         }
+         return $err;
+      }
+   }
 
    if ($$self{'ssh_num'} == 1) {
       return $self->_ssh_serial($script,$stdout,$stderr,@hosts);
@@ -351,6 +413,13 @@ sub _ssh {
 
    my $ssh = Net::OpenSSH->new($host, %{ $$self{'ssh_opts'} });
 
+   if ($$self{'tmp_script'}) {
+      my $f1 = $$self{'tmp_script'};
+      my $f2 = $$self{'ssh_script'}  ||  $f1;
+      $ssh->scp_put($f1,$f2)  or
+        return (-3);
+   }
+
    #
    # If we're sleeping, do so.
    #
@@ -363,9 +432,16 @@ sub _ssh {
    # If it's running in real-time, do so.
    #
 
+   my $f   = $$self{'ssh_script'}  ||  $$self{'tmp_script'};
+
    if ($$self{'mode'} eq 'run') {
       $ssh->system({},$script);
-      return ($?);
+      my $ret = $?;
+
+      if (! $$self{'ssh_script_keep'}) {
+         $ssh->system({},"rm -f $f");
+      }
+      return ($ret);
    }
 
    #
@@ -386,6 +462,10 @@ sub _ssh {
       $capt_exit            = $?;
    }
    $capt_exit = $capt_exit >> 8;
+
+   if (! $$self{'ssh_script_keep'}) {
+      $ssh->system({},"rm -f $f");
+   }
 
    #
    # Parse the output and return it.

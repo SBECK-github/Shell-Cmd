@@ -1,3 +1,4 @@
+.travis.yml
 Build.PL
 Changes
 examples/dry-run-2.pl
@@ -18,7 +19,6 @@ lib/Shell/Cmd.pod
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
-META.json
 README
 t/00-error.t
 t/00.scr
@@ -106,4 +106,5 @@ t/pod_coverage.t
 t/runtests
 t/runtests.bat
 t/script.pl
-META.yml
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

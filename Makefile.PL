@@ -7,8 +7,14 @@ use warnings;
 use 5.008;
 use ExtUtils::MakeMaker 6.30;
 
+my %IsWin32 = map { $_ => 1 } qw( MSWin32 NetWare symbian );
+my $IsWin32 = 1   if ($IsWin32{ $^O });
+my $Pvers   = $];
+my $ConvVers= $ExtUtils::MakeMaker::VERSION;
+
 my %module_prereq = (
    'Capture::Tiny'            => '0',
+   'IO::File'                 => '0',
    'Net::OpenSSH'             => '0',
    'Parallel::ForkManager'    => '0',
 );
@@ -17,7 +23,6 @@ my %script_prereq = (
 );
 
 my %test_prereq = (
-   'IO::File'                 => '0',
    'Test::Inter'              => '0',
    'Test::More'               => '0',
 );
@@ -35,7 +40,7 @@ if ($EU_MM_V < 6.64) {
 
 WriteMakefile(
    NAME             => "Shell::Cmd",
-   VERSION          => "2.02",
+   VERSION          => "2.03",
    ABSTRACT         => "run shell commands with enhanced support",
    LICENSE          => "perl",
    ($EU_MM_V >= 6.48
@@ -51,4 +56,35 @@ WriteMakefile(
    ($EU_MM_V >= 6.64
     ? (TEST_REQUIRES   => \%test_prereq)
     : ()),
+   ($EU_MM_V > 6.45
+    ? (META_ADD => {
+          provides     => {
+             'Shell::Cmd' => {
+                file    => 'Cmd.pm',
+                version => '2.03',
+             },
+
+          },
+       }
+      )
+    : ()),
+
+   ($EU_MM_V > 6.46
+    ? (META_MERGE => {
+          'meta-spec'  => {
+             version   => 2,
+          },
+          resources    => {
+             repository => {
+                type => 'git',
+                web  => 'https://github.com/SBECK-github/Shell-Cmd',
+                url  => 'git://github.com/SBECK-github/Shell-Cmd.git',
+             },
+          },
+       }
+      )
+    : ()),
+
+
+
 );

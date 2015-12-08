@@ -46,4 +46,7 @@ Any suggestions, bug reports, or donations :-) should be sent to me.
 2.02  2014-05-22
    - Fixed a bug where script output was not getting handled correctly
 
-2.03
+2.03  2015-12-08
+   - Put distro on GitHub.  Gabor Szabo
+   - Improvements to POD formatting.
+   - Added tmp_script, tmp_script_keep, ssh_script, and ssh_script_keep options.

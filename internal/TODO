@@ -1,3 +1,8 @@
+Write a method to take the output from the run method (in script mode)
+and easily extract information.
+
+=====
+
 o Add a 'backout' command.  If the command fails, then it will execute
   the backout commands (in reverse order) to back out the changes.  An
   option exists to say whether the backout command will execute if THIS
