@@ -49,7 +49,7 @@
    "provides" : {
       "Shell::Cmd" : {
          "file" : "Cmd.pm",
-         "version" : "2.03"
+         "version" : "2.04"
       }
    },
    "release_status" : "stable",
@@ -60,6 +60,6 @@
          "web" : "https://github.com/SBECK-github/Shell-Cmd"
       }
    },
-   "version" : "2.03",
+   "version" : "2.04",
    "x_serialization_backend" : "JSON::PP version 2.27203"
 }
