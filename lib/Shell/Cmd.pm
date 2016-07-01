@@ -14,7 +14,7 @@ use Parallel::ForkManager 0.7.6;
 use IO::File;
 
 our($VERSION);
-$VERSION = "2.10";
+$VERSION = "2.11";
 
 $| = 1;
 

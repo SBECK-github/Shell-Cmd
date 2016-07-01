@@ -21,7 +21,6 @@ LICENSE
 Makefile.PL
 MANIFEST			This list of files
 README
-t/.script.pl.swp
 t/00-error.t
 t/00-obj.t
 t/00.scr
