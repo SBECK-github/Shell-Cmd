@@ -17,7 +17,7 @@ Shell::Cmd - run shell commands with enhanced support
 =head1 DESCRIPTION
 
 A very common use of perl is to act as a wrapper around shell commands
-where it is used to prepare the shell commands, execute them, and deal
+where perl is used to prepare the shell commands, execute them, and deal
 with the resulting output.  Even where the bulk of the work is actually
 done in the perl script, creating small shell scripts within it to do
 some portion of the task is common.
@@ -57,10 +57,13 @@ to turn this on and off easily.
 Even though I may combine a number of shell commands into a single script
 (so that it all runs in one shell), I still want to have built in
 error trapping at a per-command basis.  I want to take a series of
-commands and know exactly which one failed.  I also want to be able
-to control what happens to commands that are listed after a failed
-command.  I may want to continue to run them.  I may want to just
-list them so I can see what didn't get completed.
+commands and know exactly which one failed.
+
+I also want to be able to control what happens to commands that are
+listed after a failed command.  I may want to ignore an error and
+continue to run the remaining commands.  I may want to simply exit.  Or
+I may want to echo, but not run the remaining commands so that I can see
+what didn't get completed.
 
 =item Shell environment
 
@@ -91,10 +94,11 @@ same script on multiple hosts.
 
 =item SSH handling
 
-When running on multiple hosts using SSH, sometimes you need to run the
-script serially (i.e. one host at a time), but other times, it would be
-nice to run it in parallel to speed up execution.  When running in
-parallel, you can specify how many instances to run at at time.
+When running on multiple hosts using SSH, sometimes you need to run
+the script serially (i.e. one host at a time), but other times, it
+would be nice to run it in parallel to speed up execution.  When
+running in parallel, you should be able specify how many instances to
+run at at time.
 
 =item Quoting and special characters
 
@@ -164,6 +168,12 @@ An error is returned if any of the arguments are invalid.
 
 It should be noted that no attempt is made to see if the syntax of the
 shell command is correct.  That is beyond the scope of this module.
+
+If only simple lists of commands are used, handling them is relatively
+straightforward, but trying to include commands that affect the flow
+of the script (such as C<while...done>), C<if...else>, and the like)
+then handling can be much more complicated.  Only a subset of these
+are supported.  Refer to the L</"FLOW COMMANDS"> section below.
 
 =item B<run>
 
@@ -544,13 +554,14 @@ Values for this option are:
    display
    continue
 
-The default is 'exit'.  With this option, the shell exits after a failed
-command.  The exit code is the code from the failed command.  When running
-in script mode, no information about remaining commands is returned.
+The default is 'exit'.  With this option, the shell will stop
+executing commands once one has failed.  The exit code is the code
+from the failed command.  When running in script mode, no information
+about remaining commands is returned.
 
-With the 'display' option, remaining commands are displayed (in 'run'
-mode) or returned (in 'script' mode), but they are not run.  The exit
-code is the code from the failed command.
+With the 'display' option, the simple script is displayed (in 'run'
+mode) and the point of failure is marked.  The exit code is the code
+from the failed command.
 
 With the 'continue' option, remaining command are executed, but the
 overall exit values is still set to point at the first failed command.
@@ -613,36 +624,6 @@ This will basically wrap a command in:
    COMMAND
    cd $CURR_DIR
 
-=item B<flow>
-
-The value of the B<flow> option can be '+', '-', or '='.
-
-If a command is one which is used to control the flow of a script
-(such as an if-else-fi structure or a do-while loop), you must use the
-B<flow> option for all parts of it so it so it will handle command
-echoing, error handling, and output handling correctly (none of which
-apply to flow commands).  It will also indent things correctly in
-the script to make it easier to read.
-
-If the B<flow> option is used, the B<dire> option may not be used, and
-only a single command (i.e. no alternates) may be given.
-
-The value of 'flow' may be '+' (which means you are beginning a flow
-structure), '-' meaning you are closing the flow structure, or '='
-meaning you are continuing the current flow structure.
-
-For example, you could have:
-
-   $obj->cmd('if [ "\$i" = "1" ]; then',   { 'flow' => '+' },
-             ...
-             'elif [ "\$i" = "2" ]; then', { 'flow' => '=' },
-             ...
-             'fi',                         { 'flow' => '-' }
-            );
-
-Note that for every flow '+', a flow '-' is required or else an error
-will be reported.
-
 =item B<noredir>
 
 If the B<noredir> option is included, no command line redirection is
@@ -695,15 +676,65 @@ after every alternative.
 
 =back
 
+=head1 FLOW COMMANDS
+
+When simple shell commands are given, there is no ambiguity about how
+to treat each, so handling them is relatively simple.  Simple commands
+are fully supported, and all of the functionality described above can
+be added.
+
+However, when flow commands are included, there is a great deal of difficulty
+in handling them properly.  This is because the added functionality is
+done by wrapping each command with some enclosing shell structure to add it.
+It is very easy to wrap regular shell commands in some enclosing structure.
+For example, it is easy to turn:
+
+   mycommand arg1 arg2
+
+into
+
+   if [ SOME_CONDITION ]; then
+      DO_SOMETHING
+      mycommand arg1 arg2
+      DO_SOMETHING
+   fi
+
+but you can't wrap the commands of an C<if/else/fi> block or a C<while/done>
+block.  As a result, each type of flow must be considered carefully.
+
+Currently, the only flow command which is supported is the
+C<if...elsif...else...fi> structure.  Limited loop support for C<while/done>,
+C<until/done> and C<for/done> is planned, but is not yet available.
+
+In order to recognize them, the commands will be partiall parsed, and they
+must be of the forms:
+
+   if ... ; then
+   elif ... ; then
+   else
+   fi
+
+where '...' may be any string.  In other words, the first line must start with
+if, followed by whitespace, and end with a ';' followed by optional whitespace,
+followed by 'then'.
+
+The alternate formatting of:
+
+   if ...
+   then
+   fi
+
+is not supported.
+
 =head1 KNOWN PROBLEMS
 
 =over 4
 
 =item B<Minimal support for complex scripts>
 
-These methods work best for simple lists of commands.  When you wish
-to add flow (if...then...else, while...do, etc.) these must be marked
-as such using the 'flow' option in the 'cmd' method.
+These methods work best for simple lists of commands.  Using C<if...then...else>
+is allowed, but other flow commands (such as C<while...done>, etc.) will not
+work in most instances.
 
 =back
 

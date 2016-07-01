@@ -50,3 +50,17 @@ Any suggestions, bug reports, or donations :-) should be sent to me.
    - Put distro on GitHub.  Gabor Szabo
    - Improvements to POD formatting.
    - Added tmp_script, tmp_script_keep, ssh_script, and ssh_script_keep options.
+
+2.10
+   - Fixed bug where the generated list of commands would not return you to
+     the original directory.
+   - Fixed a bug in env command which wasn't returning the documented values.
+   - Revamped how scripts are generated (scripts are a bit simpler and have
+     the potential to better support flow commands).
+   - Fixed a bug where flow commands weren't handled correctly with failure=display.
+   - Deprecated the command option 'flow'.  It is determined by parsing the
+     command instead.  The option 'flow' is allowed, but totally ignored and will
+     be removed at some point in the future.
+   - Currently only support if/elif/else/fi flow structure, but more will be
+     added in the future.
+

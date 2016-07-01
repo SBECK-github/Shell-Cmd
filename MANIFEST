@@ -5,6 +5,7 @@ examples/dry-run-2.pl
 examples/dry-run.pl
 examples/retry.pl
 examples/run-2.pl
+examples/run-3.pl
 examples/run.pl
 examples/ssh-dry-run.pl
 examples/ssh-parallel-run.pl
@@ -20,7 +21,9 @@ LICENSE
 Makefile.PL
 MANIFEST			This list of files
 README
+t/.script.pl.swp
 t/00-error.t
+t/00-obj.t
 t/00.scr
 t/01-run.exp
 t/01-run.t
@@ -86,6 +89,7 @@ t/08-script=run.t
 t/08.scr
 t/09-run.exp
 t/09-run.t
+t/09-script=run.2.t
 t/09-script=run.exp
 t/09-script=run.t
 t/09.scr

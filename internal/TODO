@@ -1,24 +1,27 @@
 Write a method to take the output from the run method (in script mode)
 and easily extract information.
 
-=====
+If a command runs, it sets a variable:
+  SC_# = 1
+If it fails, set:
+  SC_FAILED_# = 1
 
-o Add a 'backout' command.  If the command fails, then it will execute
-  the backout commands (in reverse order) to back out the changes.  An
-  option exists to say whether the backout command will execute if THIS
-  command fails, or only if future commands fail.
+o Add a 'backout' command.  If the set of commands fails, then it will
+  execute the backout commands (in reverse order) for all commands that
+  actually ran to back out the changes.  An option exists to say whether
+  the backout command will execute if THIS command fails, or only if
+  future commands fail.
+
+o Add a 'cleanup' command.  If a command ran, then at the end (after all
+  commands have run), run the command's cleanup command.  Failure is
+  ignored.
+
+=====
 
 o In non-script mode, if a command fails, and 'echo' is 'failure',
   the failed command is echoe'd at the end (not perfect, but better
   than nothing).  If it is a command with alternatives, we'll only
   display the last alternative unfortunately.
-
-? Add SC_RAN_# and SC_FAILED_# set to 0/1 if command number # ran and
-  if it failed.
-
-? At the end, for backouts, do:
-    if SC_RAN_#  &&  SC_FAILED -lt #, run backout
-
 
 add checks for:
 

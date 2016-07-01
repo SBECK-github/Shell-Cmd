@@ -1,4 +1,5 @@
 perl -I../lib 00-error.t 1
+perl -I../lib 00-obj.t 1
 perl -I../lib 01-run.t 1
 perl -I../lib 01-run_echo.t 1
 perl -I../lib 01-run_output=merged.t 1
@@ -27,5 +28,6 @@ perl -I../lib 07-script=run.t 1
 perl -I../lib 08-run.t 1
 perl -I../lib 08-script=run.t 1
 perl -I../lib 09-run.t 1
+perl -I../lib 09-script=run.2.t 1
 perl -I../lib 09-script=run.t 1
 perl -I../lib 99-cleanup.t 1

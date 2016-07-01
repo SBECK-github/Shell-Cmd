@@ -12,17 +12,29 @@ use Shell::Cmd;
 use IO::File;
 use Capture::Tiny qw(capture);
 
+our($cwd,$ret,$tmpscript);
+
 sub testScript {
    my ($ti,$file,$test,$testdir,@opts) = @_;
+   $cwd = `pwd`;
+   chomp($cwd);
+
    my @cmds    = _parseScript($file,$testdir);
 
    my $obj     = new Shell::Cmd;
+   $ret        = '';
+   $tmpscript  = 1;
 
    while (@opts) {
       my $opt = shift(@opts);
       my $val = shift(@opts);
 
-      if ($opt eq 'env') {
+      if ($opt eq 'return') {
+         $ret = $val;
+      } elsif ($opt eq 'noscript') {
+         $tmpscript = 0;
+
+      } elsif ($opt eq 'env') {
          $obj->env(@$val);
 
       } else {
@@ -56,6 +68,7 @@ sub testScript {
    my @in = <$in>;
    foreach my $line (@in) {
       $line =~ s/TESTDIR/$testdir/g;
+      $line =~ s/CURRDIR/$cwd/g;
       print $out $line;
    }
    $in->close;
@@ -63,17 +76,25 @@ sub testScript {
 
    ###
 
+   $obj->options('tmp_script',"$testdir/$file-$test.sh",'tmp_script_keep',1)
+      if ($tmpscript);
+
    my $mode = $obj->mode();
 
    if ($mode eq 'run') {
-      $t->file(\&_runRun,'','',"$file-$test.exp0",'',$obj);
+      $ti->file(\&_runRun,'','',"$file-$test.exp0",'',$obj);
    } elsif ($mode eq 'script') {
-      $t->file(\&_scrRun,'','',"$file-$test.exp0",'',$obj);
+      $ti->file(\&_scrRun,'','',"$file-$test.exp0",'',$obj);
    } else {
-      $t->file(\&_dryRun,'','',"$file-$test.exp0",'',$obj);
+      $ti->file(\&_dryRun,'','',"$file-$test.exp0",'',$obj);
    }
-   $t->done_testing();
-   unlink("$testdir/$file-$test.exp0");
+   $ti->done_testing();
+   rename("$testdir/tmp_test_inter","$testdir/$file-$test.out");
+   if (! $ENV{TI_NOCLEAN}) {
+      unlink("$testdir/$file-$test.out");
+      unlink("$testdir/$file-$test.exp0");
+      unlink("$testdir/$file-$test.sh");
+   }
 }
 
 sub _scrRun {
@@ -124,7 +145,12 @@ sub _runRun {
 sub _dryRun {
    my($output,$obj) = @_;
 
-   my($script) = $obj->run();
+   my $script;
+   if ($ret eq 'scalar') {
+      $script = $obj->run();
+   } else {
+      ($script) = $obj->run();
+   }
    my $out = new IO::File;
    $out->open(">$output");
    print $out $script,"\n";
@@ -151,6 +177,7 @@ sub _parseScript {
       #
 
       $line =~ s/TESTDIR/$testdir/g;
+      $line =~ s/CURRDIR/$cwd/g;
       $line =~ s/^\s*//;
       $line =~ s/\s*$//;
       next LINE  if (! $line  ||  $line =~ /^#/);

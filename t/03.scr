@@ -1,5 +1,5 @@
-if [ -d TESTDIR/bin ]; then      #OPTS flow +
+if [ -d TESTDIR/bin ]; then
    echo "bin found"
-else                             #OPTS flow =
+else
    echo "bin not found"
-fi                               #OPTS flow -
+fi

@@ -2,10 +2,17 @@ This is the 'succ' command
 It will succeed
 This is the 'fail' command
 It will fail
-# COMMAND NOT RUN:
+
+#****************************************
+# The following script failed
+SC_ORIG_DIRE=CURRDIR
+SC_DIRE=CURRDIR
+TESTDIR/bin/succ
+#*** Script failed in the following command
+TESTDIR/bin/fail
 TESTDIR/bin/succ.2
-# COMMAND NOT RUN:
 TESTDIR/bin/fail.2
+cd "CURRDIR"
 
 ###STDERR
 It will give a warning
