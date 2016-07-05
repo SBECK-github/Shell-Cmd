@@ -240,7 +240,7 @@ METHODS
                       all commands after the failing command.
 
         It should be noted that if a command is retried multiple times, each
-        attemp will be returned as a separate COMMAND_SUMMARY structure.
+        attempt will be returned as a separate COMMAND_SUMMARY structure.
         Since any attempt but the final one failed, the status in those will
         all be 'retried'. Only the final attempt will include a status
         indicating success or failure for the command as a whole.
@@ -658,30 +658,41 @@ FLOW COMMANDS
     "while/done" block. As a result, each type of flow must be considered
     carefully.
 
-    Currently, the only flow command which is supported is the
-    "if...elsif...else...fi" structure. Limited loop support for
-    "while/done", "until/done" and "for/done" is planned, but is not yet
-    available.
+    Currently, the supported flow commands are:
 
-    In order to recognize them, the commands will be partiall parsed, and
-    they must be of the forms:
+    "if...elsif...else...fi"
+        In order to recognize them, the commands will be partially parsed,
+        and they must be of the forms:
 
-       if ... ; then
-       elif ... ; then
-       else
-       fi
+           if ... ; then
+           elif ... ; then
+           else
+           fi
 
-    where '...' may be any string. In other words, the first line must start
-    with if, followed by whitespace, and end with a ';' followed by optional
-    whitespace, followed by 'then'.
+        where '...' may be any string. In other words, the first line must
+        start with if, followed by whitespace, and end with a ';' followed
+        by optional whitespace, followed by 'then'.
 
-    The alternate formatting of:
+        The alternate formatting of:
 
-       if ...
-       then
-       fi
+           if ...
+           then
+           fi
 
-    is not supported.
+        is not supported.
+
+    "while...done"
+    "until...done"
+    "for...done"
+        The commands must be of the form:
+
+           while ... ; do
+           until ... ; do
+           for ... ;do
+           done
+
+    At some point, the "select" and "case" structures may be supported, but
+    this in not yet available.
 
 KNOWN PROBLEMS
     Minimal support for complex scripts

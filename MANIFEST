@@ -12,8 +12,11 @@ examples/ssh-parallel-run.pl
 examples/ssh-parallel-script.pl
 examples/ssh-parallel-sleep.pl
 examples/ssh-run.pl
+examples/while.pl
 INSTALL
 internal/build.yaml
+internal/module.isp
+internal/NOTES
 internal/TODO
 lib/Shell/Cmd.pm
 lib/Shell/Cmd.pod
@@ -92,6 +95,15 @@ t/09-script=run.2.t
 t/09-script=run.exp
 t/09-script=run.t
 t/09.scr
+t/10-run.exp
+t/10-run.t
+t/10.scr
+t/11-run.exp
+t/11-run.t
+t/11.scr
+t/12-run.exp
+t/12-run.t
+t/12.scr
 t/99-cleanup.exp
 t/99-cleanup.t
 t/99.scr

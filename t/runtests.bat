@@ -30,4 +30,7 @@ perl -I../lib 08-script=run.t 1
 perl -I../lib 09-run.t 1
 perl -I../lib 09-script=run.2.t 1
 perl -I../lib 09-script=run.t 1
+perl -I../lib 10-run.t 1
+perl -I../lib 11-run.t 1
+perl -I../lib 12-run.t 1
 perl -I../lib 99-cleanup.t 1

@@ -263,7 +263,7 @@ STATUS is one of the strings:
               all commands after the failing command.
 
 It should be noted that if a command is retried multiple times,
-each attemp will be returned as a separate COMMAND_SUMMARY structure.
+each attempt will be returned as a separate COMMAND_SUMMARY structure.
 Since any attempt but the final one failed, the status in those
 will all be 'retried'.  Only the final attempt will include a status
 indicating success or failure for the command as a whole.
@@ -702,11 +702,13 @@ into
 but you can't wrap the commands of an C<if/else/fi> block or a C<while/done>
 block.  As a result, each type of flow must be considered carefully.
 
-Currently, the only flow command which is supported is the
-C<if...elsif...else...fi> structure.  Limited loop support for C<while/done>,
-C<until/done> and C<for/done> is planned, but is not yet available.
+Currently, the supported flow commands are:
 
-In order to recognize them, the commands will be partiall parsed, and they
+=over 4
+
+=item C<if...elsif...else...fi>
+
+In order to recognize them, the commands will be partially parsed, and they
 must be of the forms:
 
    if ... ; then
@@ -725,6 +727,24 @@ The alternate formatting of:
    fi
 
 is not supported.
+
+=item C<while...done>
+
+=item C<until...done>
+
+=item C<for...done>
+
+The commands must be of the form:
+
+   while ... ; do
+   until ... ; do
+   for ... ;do
+   done
+
+=back
+
+At some point, the C<select> and C<case> structures may be supported, but
+this in not yet available.
 
 =head1 KNOWN PROBLEMS
 

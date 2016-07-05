@@ -1,5 +1,5 @@
 package Shell::Cmd;
-# Copyright (c) 2013-2015 Sullivan Beck. All rights reserved.
+# Copyright (c) 2013-2016 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -745,7 +745,7 @@ BEGIN {
          # if, elif, else, fi
          if      ($cmd =~ /^\s*(if)\s+.*?;\s*then\s*$/   ||
                   $cmd =~ /^\s*(elif)\s+.*?;\s*then\s*$/ ||
-                  $cmd =~ /^\s*(else)\s*$/            ||
+                  $cmd =~ /^\s*(else)\s*$/               ||
                   $cmd =~ /^\s*(fi)\s*$/) {
             $flow = $1;
 
@@ -757,7 +757,7 @@ BEGIN {
                if (! @sc_flow  ||
                    $sc_flow[$#sc_flow][0] ne 'if') {
                   $$self{'err'} =
-                    "Broken flow (if) at command: $sc_flow[$#sc_flow][1]";
+                    "Broken flow: 'fi' found, but no 'if': $cmd_num";
                   return ();
                }
 
@@ -767,6 +767,29 @@ BEGIN {
                } else {
                   $type = 'cont';
                }
+            }
+
+         } elsif ($cmd =~ /^\s*(while)\s+.*?;\s*do\s*$/   ||
+                  $cmd =~ /^\s*(until)\s+.*?;\s*do\s*$/   ||
+                  $cmd =~ /^\s*(for)\s+.*?;\s*do\s*$/     ||
+                  $cmd =~ /^\s*(done)\s*$/) {
+            $flow = $1;
+
+            if ($flow eq 'while'  ||  $flow eq 'until'  ||  $flow eq 'for') {
+               push(@sc_flow,[$flow,$cmd_num]);
+               $type = 'open';
+            } else {
+               if (! @sc_flow  ||
+                   ($sc_flow[$#sc_flow][0] ne 'while'  &&
+                    $sc_flow[$#sc_flow][0] ne 'until'  &&
+                    $sc_flow[$#sc_flow][0] ne 'for')) {
+                  $$self{'err'} =
+                    "Broken flow: 'done' found, but no 'while/until/for': $cmd_num";
+                  return ();
+               }
+
+               $type = 'close';
+               pop(@sc_flow);
             }
          }
       }
