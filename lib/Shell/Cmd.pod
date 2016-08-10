@@ -171,7 +171,7 @@ shell command is correct.  That is beyond the scope of this module.
 
 If only simple lists of commands are used, handling them is relatively
 straightforward, but trying to include commands that affect the flow
-of the script (such as C<while...done>), C<if...else>, and the like)
+of the script (such as C<while...done>, C<if...else>, and the like)
 then handling can be much more complicated.  Only a subset of these
 are supported.  Refer to the L</"FLOW COMMANDS"> section below.
 
@@ -752,9 +752,8 @@ this in not yet available.
 
 =item B<Minimal support for complex scripts>
 
-These methods work best for simple lists of commands.  Using C<if...then...else>
-is allowed, but other flow commands (such as C<while...done>, etc.) will not
-work in most instances.
+These methods work best for simple lists of commands.  Using simple command
+flow (<if...then...else>, etc.) is allowed, but must be used carefully.
 
 =back
 

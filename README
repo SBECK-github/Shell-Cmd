@@ -146,7 +146,7 @@ METHODS
 
         If only simple lists of commands are used, handling them is
         relatively straightforward, but trying to include commands that
-        affect the flow of the script (such as "while...done"), "if...else",
+        affect the flow of the script (such as "while...done", "if...else",
         and the like) then handling can be much more complicated. Only a
         subset of these are supported. Refer to the "FLOW COMMANDS" section
         below.
@@ -696,9 +696,9 @@ FLOW COMMANDS
 
 KNOWN PROBLEMS
     Minimal support for complex scripts
-        These methods work best for simple lists of commands. Using
-        "if...then...else" is allowed, but other flow commands (such as
-        "while...done", etc.) will not work in most instances.
+        These methods work best for simple lists of commands. Using simple
+        command flow (<if...then...else>, etc.) is allowed, but must be used
+        carefully.
 
 LICENSE
     This script is free software; you can redistribute it and/or modify it
