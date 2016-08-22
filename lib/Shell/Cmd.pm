@@ -15,7 +15,7 @@ use IO::File;
 use Cwd;
 
 our($VERSION);
-$VERSION = "2.12";
+$VERSION = "2.13";
 
 $| = 1;
 
