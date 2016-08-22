@@ -12,6 +12,7 @@ use Capture::Tiny qw(capture capture_stdout capture_stderr);
 use Net::OpenSSH;
 use Parallel::ForkManager 0.7.6;
 use IO::File;
+use Cwd;
 
 our($VERSION);
 $VERSION = "2.12";

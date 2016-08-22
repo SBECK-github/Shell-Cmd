@@ -16,7 +16,7 @@ our($cwd,$ret,$tmpscript);
 
 sub testScript {
    my ($ti,$file,$test,$testdir,@opts) = @_;
-   $cwd = `pwd`;
+   $cwd = `pwd;`;
    chomp($cwd);
 
    my @cmds    = _parseScript($file,$testdir);

@@ -68,6 +68,8 @@ Any suggestions, bug reports, or donations :-) should be sent to me.
    - Fixed a packaging problem (a .swp file got included)
    - Added support for while/done, until/done, and for/done flow structures.
 
-2.12
+2.12  2016-08-22
    - Improved test scripts, and added a number of new tests.
+   - Getting `pwd` in a directory with soft links was failing.  RT 117096
 
+2.13

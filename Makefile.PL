@@ -14,6 +14,7 @@ my $ConvVers= $ExtUtils::MakeMaker::VERSION;
 
 my %module_prereq = (
    'Capture::Tiny'            => '0',
+   'Cwd'                      => '0',
    'IO::File'                 => '0',
    'Net::OpenSSH'             => '0',
    'Parallel::ForkManager'    => '0',
@@ -23,7 +24,6 @@ my %script_prereq = (
 );
 
 my %test_prereq = (
-   'Cwd'                      => '0',
    'Test::Inter'              => '0',
    'Test::More'               => '0',
 );
