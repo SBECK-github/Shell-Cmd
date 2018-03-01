@@ -1,3 +1,12 @@
+Handle output better:
+    add { label = LABEL } to each command
+When running in script mode, take:
+    $obj->output( [HOST], ARG , OPTIONS)
+which returns some/all of the output.
+    - ask for all command as a list (with/without commands with leading '#')
+    - ask for output from a single command
+
+
 Add a script method that takes a script (multiline string) and parses
 it.
 

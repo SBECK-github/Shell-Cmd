@@ -7,20 +7,22 @@ $testdir = $t->testdir();
 
 $ENV{'SHELL_CMD_TESTING'} = 1;
 
-use Cwd;
-my $dir  = getcwd;
-$dir     =~ /Shell-Cmd-([0-9.]+)/;
-my $vers = $1;
-
 use Shell::Cmd;
+use Cwd;
+my $vers;
+if ($ENV{'RELEASE_TESTING'}) {
+   my $dir  = getcwd;
+   $dir     =~ /Shell-Cmd-([0-9.]+)/;
+   $vers    = $1;
+} else {
+   # We'll only test the directory/version on my machine.
+   # In some instances elsewhere, the install directory in renamed
+   # unpredicatbly, so we won't do this test there.
+   $vers    = $Shell::Cmd::VERSION;
+}
+
 my $obj;
 $obj  = new Shell::Cmd;
-
-# Travis-CI renames the directory to just Date-Manip (no version) so this
-# test cannot be done.
-if (! defined $vers) {
-   $vers = $obj->version();
-}
 
 sub test {
   ($op,@args)=@_;

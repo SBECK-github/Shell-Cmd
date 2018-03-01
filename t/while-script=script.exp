@@ -33,7 +33,7 @@ main () {
       SC_FAILED=2;
    fi
    if [ $SC_EXIT -ne 0 ]; then
-      return
+      return;
    fi
 
    while [ $i -ne 3 ]; do
@@ -67,7 +67,7 @@ main () {
          SC_FAILED=4;
       fi
       if [ $SC_EXIT -ne 0 ]; then
-         return
+         return;
       fi
 
       #
@@ -99,12 +99,12 @@ main () {
          SC_FAILED=5;
       fi
       if [ $SC_EXIT -ne 0 ]; then
-         return
+         return;
       fi
 
    done
    cd "$SC_ORIG_DIRE";
 }
 
-main
+main;
 exit $SC_EXIT;

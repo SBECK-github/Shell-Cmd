@@ -28,7 +28,7 @@ main () {
       SC_FAILED=2;
    fi
    if [ $SC_EXIT -ne 0 ]; then
-      return
+      return;
    fi
 
    #
@@ -65,7 +65,7 @@ main () {
       SC_FAILED=3;
    fi
    if [ $SC_EXIT -ne 0 ]; then
-      return
+      return;
    fi
 
    #
@@ -92,11 +92,11 @@ main () {
       SC_FAILED=4;
    fi
    if [ $SC_EXIT -ne 0 ]; then
-      return
+      return;
    fi
    cd "$SC_ORIG_DIRE";
 }
 
-main
+main;
 exit $SC_EXIT;
 

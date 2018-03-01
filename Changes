@@ -57,7 +57,8 @@ Any suggestions, bug reports, or donations :-) should be sent to me.
    - Fixed a bug in env command which wasn't returning the documented values.
    - Revamped how scripts are generated (scripts are a bit simpler and have
      the potential to better support flow commands).
-   - Fixed a bug where flow commands weren't handled correctly with failure=display.
+   - Fixed a bug where flow commands weren't handled correctly with
+     failure=display.
    - Deprecated the command option 'flow'.  It is determined by parsing the
      command instead.  The option 'flow' is allowed, but totally ignored and will
      be removed at some point in the future.
@@ -72,4 +73,8 @@ Any suggestions, bug reports, or donations :-) should be sent to me.
    - Improved test scripts, and added a number of new tests.
    - Getting `pwd` in a directory with soft links was failing.  RT 117096
 
-2.13
+2.13  2017-02-10
+   - Got rid of global data (stuck it in the object) to avoid problems
+     when calling multiple times.
+
+2.14
