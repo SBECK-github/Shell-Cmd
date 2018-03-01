@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2015 Sullivan Beck. All rights reserved.
+# Copyright (c) 2013-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -17,10 +17,10 @@ Shell::Cmd - run shell commands with enhanced support
 =head1 DESCRIPTION
 
 A very common use of perl is to act as a wrapper around shell commands
-where perl is used to prepare the shell commands, execute them, and deal
-with the resulting output.  Even where the bulk of the work is actually
-done in the perl script, creating small shell scripts within it to do
-some portion of the task is common.
+where perl is used to prepare the shell commands, execute them, and
+deal with the resulting output.  Even where the bulk of the work is
+actually done in the perl script, creating small shell scripts within
+it to do some portion of the task is common.
 
 In the simplest form, running shell commands can be done very simply
 using the C<system()> call, backticks, or several other ways, but I
@@ -37,60 +37,62 @@ commands) which adds some common desirable functionality including:
 
 =item Handle STDOUT/STDERR
 
-Commonly, I want to treat STDOUT and STDERR in some way.  I may want to
-keep one or both of them, or discard one or both of them, or merge them.
+Commonly, I want to treat STDOUT and STDERR in some way.  I may want
+to keep one or both of them, or discard one or both of them, or merge
+them.
 
 =item Command echoing
 
-A common option I want to set is command echoing where the commands
-I run are echoed as they are run.  I want to be able to easily turn this
-on or off.
+A common option I want to set is command echoing where the commands I
+run are echoed as they are run.  I want to be able to easily turn this
+on or off (typically with a command line option in the calling script).
 
 =item Dry-run
 
-Another common option is to create a dry-run environment where the shell
-commands may be printed, but not actually run.  Again, I want to be able
-to turn this on and off easily.
+Another common option is to create a dry-run environment where the
+shell commands may be printed, but not actually run.  Again, I want to
+be able to turn this on and off easily.
 
 =item Error trapping
 
-Even though I may combine a number of shell commands into a single script
-(so that it all runs in one shell), I still want to have built in
-error trapping at a per-command basis.  I want to take a series of
+Even though I may combine a number of shell commands into a single
+script (so that it all runs in one shell), I still want to have built
+in error trapping at a per-command basis.  I want to take a series of
 commands and know exactly which one failed.
 
 I also want to be able to control what happens to commands that are
 listed after a failed command.  I may want to ignore an error and
-continue to run the remaining commands.  I may want to simply exit.  Or
-I may want to echo, but not run the remaining commands so that I can see
-what didn't get completed.
+continue to run the remaining commands.  I may want to simply exit.
+Or I may want to echo, but not run the remaining commands so that I
+can see what didn't get completed.
 
 =item Shell environment
 
-I sometimes want to set up some environment for the script such as what
-directory it will be run in and what environment variables should be set
-in advance.
+I sometimes want to set up some environment for the script such as
+what directory it will be run in and what environment variables should
+be set in advance.
 
 =item Command alternates
 
 Sometimes, especially if you are running the script on multiple
-platforms, you may not know which command you should use.  You can
-of course generate a platform specific script, but an alternative is
-to specify alternate commands.  If ANY of those commands succeed,
-then that portion of the script succeeds.
+platforms, you may not know which command you should use.  You can of
+course generate a platform specific script, but an alternative is to
+specify alternate commands.  If ANY of those commands succeed, then
+that portion of the script succeeds.
 
 =item Command retrying
 
-Occasionally you have a command that may fail, but on retrying, it will
-succeed.  This is especially true when some effect from a previous command
-takes some amount of time to actually go into effect.  By allowing a certain
-number of retries, you can often work around this situation.
+Occasionally you have a command that may fail, but on retrying, it
+will succeed.  This is especially true when some effect from a
+previous command takes some amount of time to actually go into effect.
+By allowing a certain number of retries, you can often work around
+this situation.
 
 =item Remote execution
 
-Sometimes you want to run the commands locally.  Other times, you want to
-run it remotely using ssh.  When running remotely, you may want to run the
-same script on multiple hosts.
+Sometimes you want to run the commands locally.  Other times, you want
+to run it remotely using ssh.  When running remotely, you may want to
+run the same script on multiple hosts.
 
 =item SSH handling
 
@@ -135,14 +137,14 @@ Returns the version of this module.
 This is used to add one or more commands to the list of commands that
 will be executed.
 
-Here, each C<$cmd> is a string containing a command, or a listref where each
-element in the list is a command.
+Here, each C<$cmd> is a string containing a command, or a listref
+where each element in the list is a command.
 
 In the listref form, the list of commands are alternates to try until
 one succeeds, and the command only fails if all of the alternates
 fail.  This might be used to specify different paths to an executable,
-or different executables that perform essentially the same function, but
-which might not all be available on all platforms.
+or different executables that perform essentially the same function,
+but which might not all be available on all platforms.
 
 For example, if you wanted to run a command to get the contents of a
 web site, and you didn't know which of curl, wget, or lftp were
@@ -150,16 +152,16 @@ available, you might use something like this:
 
    $err = $obj->cmd([ "wget $URL", "curl $URL", "lftp $URL"]);
 
-and in this case, it would try wget, and if that failed, it would
-try curl, and if that failed, it would try lftp.  The command will only
+and in this case, it would try wget, and if that failed, it would try
+curl, and if that failed, it would try lftp.  The command will only
 fail if all three alternates fail.
 
 Each command (or list of alternates) can have options passed in.
 These options apply only to this command (or list), and are described
 in the L</"PER-COMMAND OPTIONS"> section below.
 
-All of the commands stored in C<$obj> will be run in a single shell, so
-it is fine to gather information in one command and store it in a
+All of the commands stored in C<$obj> will be run in a single shell,
+so it is fine to gather information in one command and store it in a
 shell variable for use in a later command.  Also, it is not necessary
 (or desirable) to include a trailing semi-colon on the command as
 these will be added automatically as needed.
@@ -172,8 +174,8 @@ shell command is correct.  That is beyond the scope of this module.
 If only simple lists of commands are used, handling them is relatively
 straightforward, but trying to include commands that affect the flow
 of the script (such as C<while...done>, C<if...else>, and the like)
-then handling can be much more complicated.  Only a subset of these
-are supported.  Refer to the L</"FLOW COMMANDS"> section below.
+then handling can be much more complicated.  Refer to the
+L</"FLOW COMMANDS"> section below.
 
 =item B<run>
 
@@ -181,9 +183,10 @@ are supported.  Refer to the L</"FLOW COMMANDS"> section below.
 
 This prepares a shell script based on the commands and options entered
 and runs it as appropriate.  There are several different ways in which
-the commands can be run, and these are described in the B<options> method
-below.  The most important option is the B<mode> option which sets the mode
-which determines the form of the script, and how it is run.
+the commands can be run, and these are described in the B<options>
+method below.  The most important option is the B<mode> option which
+sets the mode which determines the form of the script, and how it is
+run.
 
 If C<$obj> is in 'run' mode, the method can be called as either:
 
@@ -199,23 +202,26 @@ will be -2.  Otherwise, the return value of the method is the exit
 code of the script (which is the exit code of the first failing
 command).
 
-If C<$obj> is in 'dry-run' mode, the method should be called as either:
+If C<$obj> is in 'dry-run' mode, the method should be called as
+either:
 
    ($script) = $obj->run();
    $script   = $obj->run();
 
 In this mode, the commands are not actually executed.  Instead, the
-script is built and returned.  The form of the script is determined
-by the B<script> option described below.
+script is built and returned.  The form of the script is determined by
+the B<script> option described below.
 
-If C<$obj> is in 'script' mode, the output from the commands are kept for
-further analysis.  The method should be called as:
+If C<$obj> is in 'script' mode, the output from the commands are kept
+for further analysis.  The method should be called as:
 
    @out      = $obj->run();
 
 Here, C<@out> is a list of command output descriptors:
 
-   @out      = ( FAILED_COMMAND, COMMAND_SUMMARY_1, COMMAND_SUMMARY_2, ... )
+   @out      = ( FAILED_COMMAND,
+                 COMMAND_SUMMARY_1,
+                 COMMAND_SUMMARY_2, ... )
 
 Here, FAILED_COMMAND is the command number that failed.  If
 FAILED_COMMAND is 0, it means that the script completed successfully.
@@ -229,7 +235,9 @@ For each command that ran, the output is returned along with
 information about the command status.  The format of each
 COMMAND_SUMMARY is a listref of the form:
 
-   COMMAND_SUMMARY = [ CMD_NUM, STATUS, ALT_SUMMARY_1, ALT_SUMMARY_2, ... ]
+   COMMAND_SUMMARY = [ CMD_NUM, STATUS,
+                       ALT_SUMMARY_1,
+                       ALT_SUMMARY_2, ... ]
 
 CMD_NUM is the number of the command as it was entered with the B<cmd>
 method starting at 0.  Each ALT_SUMMARY is the summary for one of the
@@ -239,19 +247,18 @@ STATUS is one of the strings:
 
    ''       : Any command that succeeds will be given either a
    succ       STATUS of an empty string, or the string 'succ'.
-              If the B<failure> option is set to 'continue',
-              all commands which succeed are given the empty
-              string until a command fails.  Commands run after
-              that are given a STATUS of 'succ'.
+              If the B<failure> option is set to 'continue', all
+              commands which succeed are given the empty string until
+              a command fails.  Commands run after that are given a
+              STATUS of 'succ'.
 
-              If B<failure> is set to any other option, only
-              the empty string is ever assigned as STATUS for
-              a successful command.
+              If B<failure> is set to any other option, only the empty
+              string is ever assigned as STATUS for a successful
+              command.
 
-   retried  : If a command is retried, all attempts may fail
-              (except the final one) and it is not counted as
-              a script failure.  These failing commands are
-              given this STATUS.
+   retried  : If a command is retried, all attempts may fail (except
+              the final one) and it is not counted as a script
+              failure.  These failing commands are given this STATUS.
 
    exit     : The first command that actually fails is given
    fail       the status 'exit'.  Other commands that fail
@@ -262,22 +269,22 @@ STATUS is one of the strings:
               option is set to 'display', and will apply to
               all commands after the failing command.
 
-It should be noted that if a command is retried multiple times,
-each attempt will be returned as a separate COMMAND_SUMMARY structure.
-Since any attempt but the final one failed, the status in those
-will all be 'retried'.  Only the final attempt will include a status
+It should be noted that if a command is retried multiple times, each
+attempt will be returned as a separate COMMAND_SUMMARY structure.
+Since any attempt but the final one failed, the status in those will
+all be 'retried'.  Only the final attempt will include a status
 indicating success or failure for the command as a whole.
 
-Each alternate will return a separate summary, also a listref, of
-the form:
+Each alternate will return a separate summary, also a listref, of the
+form:
 
    ALT_SUMMARY_i = [ CMD, EXIT, STDOUT, STDERR ]
 
 CMD is the full command that was run.
 
-EXIT is the exit value from that command.  Note that if a command
-has alternates, then one or more of them may fail (causing an exit
-value to appear here) without causing the overall command to fail.
+EXIT is the exit value from that command.  Note that if a command has
+alternates, then one or more of them may fail (causing an exit value
+to appear here) without causing the overall command to fail.
 
 STDOUT and STDERR are the output produced by that command.  Depending
 on the values of the B<output> and B<f-output> options, one or both of
@@ -656,7 +663,7 @@ integer, there will be no delay between retries.
 
 This command will be marked as failed only if all of the retries fail.
 
-You cannot retry a B<flow> command.
+You cannot retry a flow command.
 
 =item B<check>
 
@@ -683,11 +690,12 @@ to treat each, so handling them is relatively simple.  Simple commands
 are fully supported, and all of the functionality described above can
 be added.
 
-However, when flow commands are included, there is a great deal of difficulty
-in handling them properly.  This is because the added functionality is
-done by wrapping each command with some enclosing shell structure to add it.
-It is very easy to wrap regular shell commands in some enclosing structure.
-For example, it is easy to turn:
+However, when flow commands are included, they must be handled in a
+different way in order to deal with them properly.  This is because
+the added functionality is done by wrapping each command with some
+enclosing shell structure to add it.  It is very easy to wrap regular
+shell commands in some enclosing structure.  For example, it is easy
+to turn:
 
    mycommand arg1 arg2
 
