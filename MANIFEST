@@ -1,5 +1,3 @@
-.travis.yml
-Build.PL
 Changes
 examples/dry-run-2.pl
 examples/dry-run.pl

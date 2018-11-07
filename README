@@ -32,7 +32,8 @@ DESCRIPTION
     Command echoing
         A common option I want to set is command echoing where the commands
         I run are echoed as they are run. I want to be able to easily turn
-        this on or off.
+        this on or off (typically with a command line option in the calling
+        script).
 
     Dry-run
         Another common option is to create a dry-run environment where the
@@ -147,9 +148,8 @@ METHODS
         If only simple lists of commands are used, handling them is
         relatively straightforward, but trying to include commands that
         affect the flow of the script (such as "while...done", "if...else",
-        and the like) then handling can be much more complicated. Only a
-        subset of these are supported. Refer to the "FLOW COMMANDS" section
-        below.
+        and the like) then handling can be much more complicated. Refer to
+        the "FLOW COMMANDS" section below.
 
     run
            $obj->run();
@@ -161,10 +161,9 @@ METHODS
         which sets the mode which determines the form of the script, and how
         it is run.
 
-        If $obj is in 'run' mode, the method can be called as either:
+        If $obj is in 'run' mode, the method is called as:
 
-           ($err)    = $obj->run();
-           $err      = $obj->run();
+           $err = $obj->run();
 
         In this mode, the script is run, and output is sent directly to
         STDOUT and STDERR as appropriate for the options specified. In
@@ -176,10 +175,9 @@ METHODS
         code of the script (which is the exit code of the first failing
         command).
 
-        If $obj is in 'dry-run' mode, the method should be called as either:
+        If $obj is in 'dry-run' mode, the method is called as:
 
-           ($script) = $obj->run();
-           $script   = $obj->run();
+           $script = $obj->run();
 
         In this mode, the commands are not actually executed. Instead, the
         script is built and returned. The form of the script is determined
@@ -188,80 +186,10 @@ METHODS
         If $obj is in 'script' mode, the output from the commands are kept
         for further analysis. The method should be called as:
 
-           @out      = $obj->run();
+           $err = $obj->run();
 
-        Here, @out is a list of command output descriptors:
-
-           @out      = ( FAILED_COMMAND, COMMAND_SUMMARY_1, COMMAND_SUMMARY_2, ... )
-
-        Here, FAILED_COMMAND is the command number that failed. If
-        FAILED_COMMAND is 0, it means that the script completed
-        successfully. If it is -1, it means that the script initialization
-        failed before any of the commands were run. This typically means
-        that an invalid directory was specified with the dire method. If
-        FAILED_COMMAND is any other value, it will be an integer I. In this
-        case, the failed command is described in COMMAND_SUMMARY_I.
-
-        For each command that ran, the output is returned along with
-        information about the command status. The format of each
-        COMMAND_SUMMARY is a listref of the form:
-
-           COMMAND_SUMMARY = [ CMD_NUM, STATUS, ALT_SUMMARY_1, ALT_SUMMARY_2, ... ]
-
-        CMD_NUM is the number of the command as it was entered with the cmd
-        method starting at 0. Each ALT_SUMMARY is the summary for one of the
-        alternates for this command.
-
-        STATUS is one of the strings:
-
-           ''       : Any command that succeeds will be given either a
-           succ       STATUS of an empty string, or the string 'succ'.
-                      If the B<failure> option is set to 'continue',
-                      all commands which succeed are given the empty
-                      string until a command fails.  Commands run after
-                      that are given a STATUS of 'succ'.
-
-                      If B<failure> is set to any other option, only
-                      the empty string is ever assigned as STATUS for
-                      a successful command.
-
-           retried  : If a command is retried, all attempts may fail
-                      (except the final one) and it is not counted as
-                      a script failure.  These failing commands are
-                      given this STATUS.
-
-           exit     : The first command that actually fails is given
-           fail       the status 'exit'.  Other commands that fail
-                      (if the B<failure> option is set to 'continue')
-                      are given the status 'fail'.
-
-           disp     : This is only available if the B<failure>
-                      option is set to 'display', and will apply to
-                      all commands after the failing command.
-
-        It should be noted that if a command is retried multiple times, each
-        attempt will be returned as a separate COMMAND_SUMMARY structure.
-        Since any attempt but the final one failed, the status in those will
-        all be 'retried'. Only the final attempt will include a status
-        indicating success or failure for the command as a whole.
-
-        Each alternate will return a separate summary, also a listref, of
-        the form:
-
-           ALT_SUMMARY_i = [ CMD, EXIT, STDOUT, STDERR ]
-
-        CMD is the full command that was run.
-
-        EXIT is the exit value from that command. Note that if a command has
-        alternates, then one or more of them may fail (causing an exit value
-        to appear here) without causing the overall command to fail.
-
-        STDOUT and STDERR are the output produced by that command. Depending
-        on the values of the output and f-output options, one or both of
-        these may be empty, even if the command actually produced that type
-        of output. So, if the value of output is 'stderr', the the STDOUT
-        will be empty, even if the command produced something. Both are
-        listrefs of lines.
+        and then use the $obj->output(...) method to examine the resulting
+        output.
 
     ssh
            $obj->ssh(@hosts);
@@ -279,10 +207,7 @@ METHODS
 
         In 'script' mode, the call is:
 
-           ($out1,$out2,...) = $obj->ssh(@hosts);
-
-        where $out1 is a reference to the list of output on the 1st host,
-        etc.
+           $obj->ssh(@hosts);
 
         Note that when running in parallel in 'run' mode, the output that is
         printed to the terminal will be a mix of the output from each of the
@@ -292,19 +217,30 @@ METHODS
         return value in both cases will be (-2). If the file cannot be
         copied to a host, then the return value for that host will be -3.
 
+    output
+           @out = $obj->output(%options);
+           %out = $obj->output(%options);
+
+        This will return the output produced by running the commands in
+        'script' mode.
+
+        The %options argument is described below in the OUTPUT OPTIONS
+        section.
+
     flush
            $obj->flush( [@opts] );
 
-        If @opts is not given, it removes the commands, directory, and
-        environment stored in the object, and resets the options to the
-        default values.
+        If @opts is not given, it removes all the data stored in the object,
+        resetting it to a clean object. If @opts is given, you can clear
+        specific parts of the object. Any of the following options can be
+        given:
 
-        If @opts is given, it can include any of the following:
-
-           commands   : clears commands
+           commands   : clears all commands and their options
            dire       : clears the directory
            env        : clears the environment
            opts       : clears all options
+           out        : clears the output from running the command
+                        in 'script' mode
 
     dire
            $err = $obj->dire($dire);
@@ -434,43 +370,10 @@ GLOBAL OPTIONS
 
         The default in both cases is 'both'.
 
-        In the 'script' mode, the output is determined by using a
-        combination of the 'output' and 'f-output' options as described
-        next.
-
-    f-output
-        The f-output option can be one of the following:
-
-           both
-           merged
-           stdout
-           stderr
-           quiet
-
-        and is only used in 'script' mode.
-
-        In 'script' mode, all of the output is gathered and analyzed after
-        the commands are run, so the output can be tailored to whether a
-        command completed successfully or failed.
-
-        The 'output' option controls what output is returned for commands
-        that completed successfully, and the 'f-output' option controls the
-        output given for a failed command. Note that if a command has
-        multiple alternatives, and one of them succeeds, the command is
-        treated as succeeding, and the output for all alternates (even the
-        individual ones that fail) will follow the rules of 'output' rather
-        than 'f-output'.
-
-        It should be noted that since the command runs fully before it can
-        be seen whether it failed or not, STDOUT/STDERR will either be
-        separate or merged based on the first option. If the first option is
-        'both', 'stdout, or 'stderr', they will be separate, and the
-        'f-merged' option is not supported (it will be replaced by
-        'f-both'). If the first option is 'merged', then the 'f-both',
-        'f-stdout', and 'f-stderr' options are not supported and will be
-        replaced by 'f-merged'.
-
-        The default to these are 'both' and 'f-both'.
+        In the 'script' mode, this specifies which output is stored in the
+        object. Output that is stored is available (using the output method)
+        to be examined. If the output is discarded, it will not be available
+        for further examination.
 
     script
         The script option is used only in dry-run mode.
@@ -632,17 +535,22 @@ PER-COMMAND OPTIONS
         If this is given for a command which has alternatives, it will be
         run after every alternative.
 
+    label
+        Each command can have a label attached to it which will allow you to
+        refer to that command by the label. This is useful in analyzing the
+        output.
+
 FLOW COMMANDS
     When simple shell commands are given, there is no ambiguity about how to
     treat each, so handling them is relatively simple. Simple commands are
     fully supported, and all of the functionality described above can be
     added.
 
-    However, when flow commands are included, there is a great deal of
-    difficulty in handling them properly. This is because the added
-    functionality is done by wrapping each command with some enclosing shell
-    structure to add it. It is very easy to wrap regular shell commands in
-    some enclosing structure. For example, it is easy to turn:
+    However, when flow commands are included, they must be handled in a
+    different way in order to deal with them properly. This is because the
+    added functionality is done by wrapping each command with some enclosing
+    shell structure to add it. It is very easy to wrap regular shell
+    commands in some enclosing structure. For example, it is easy to turn:
 
        mycommand arg1 arg2
 
@@ -693,6 +601,80 @@ FLOW COMMANDS
 
     At some point, the "select" and "case" structures may be supported, but
     this in not yet available.
+
+OUTPUT OPTIONS
+    When commands are run in the 'script' mode, the output is stored in the
+    object.
+
+    To access the output, use one of the following calls to the output
+    method:
+
+       @out = $obj->output(%options);
+       %out = $obj->output(%options);
+
+    If the commands were run on the current host with the run method, the
+    first call is used. The output will always be returned as a list.
+
+    If the commands were run on multiple hosts using the ssh method, the
+    second call is typically used. This will return a hash:
+
+       %out = { HOST => [@out] }
+
+    where "HOST" is the name of the host, and @out is the output that you
+    have requested.
+
+    If you want to look only at the output on a single host (see the host
+    option described next), the output will be returned as a list rather
+    than a hash.
+
+    The output method will return selected portions of the output in the
+    format specified by the options as described below.
+
+    host
+        If the commands are run using the ssh method on multiple hosts, then
+        you can specify which host or hosts you are interested in using this
+        option.
+
+        The value of the host option can be a scalar (the name of the single
+        host you want to examine) or a list (the names of multiple hosts you
+        want to examine). If the option is not given, you will look at the
+        output from all hosts.
+
+        If the value is specified as a scalar, the output will be returned
+        as a list. If the value is a list (even if it only has a single
+        element), the output will be returned as a hash.
+
+    command
+        # =item f-output
+
+        # The f-output option can be one of the following:
+
+        # both # merged # stdout # stderr # quiet
+
+        # and is only used in 'script' mode.
+
+        # In 'script' mode, all of the output is gathered and analyzed after
+        # the commands are run, so the output can be tailored to whether a #
+        command completed successfully or failed.
+
+        # The 'output' option controls what output is returned for commands
+        that # completed successfully, and the 'f-output' option controls
+        the output # given for a failed command. Note that if a command has
+        multiple # alternatives, and one of them succeeds, the command is
+        treated as # succeeding, and the output for all alternates (even the
+        individual ones # that fail) will follow the rules of 'output'
+        rather than 'f-output'.
+
+        # It should be noted that since the command runs fully before it can
+        be # seen whether it failed or not, STDOUT/STDERR will either be
+        separate # or merged based on the first option. If the first option
+        is 'both', # 'stdout, or 'stderr', they will be separate, and the
+        'f-merged' option # is not supported (it will be replaced by
+        'f-both'). If the first # option is 'merged', then the 'f-both',
+        'f-stdout', and 'f-stderr' # options are not supported and will be
+        replaced by 'f-merged'.
+
+        # The default to these are 'both' and 'f-both'.
 
 KNOWN PROBLEMS
     Minimal support for complex scripts

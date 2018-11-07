@@ -1,5 +1,0 @@
-if [ -d TESTDIR/bin ]; then
-   echo "bin found"
-else
-   echo "bin not found"
-fi
