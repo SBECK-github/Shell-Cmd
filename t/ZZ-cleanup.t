@@ -10,6 +10,12 @@ $testdir = $t->testdir();
 
 require "$testdir/script.pl";
 
+if ($ENV{'TI_NOCLEAN'}) {
+   $t->skip_all('Cleanup test ignored');
+   exit;
+}
+
+
 testScript($t,$script,$test,$testdir,
            'mode'   => 'run',
           );

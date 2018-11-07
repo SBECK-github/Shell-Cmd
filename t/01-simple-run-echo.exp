@@ -1,11 +1,11 @@
-# SC_ORIG_DIRE=/home/sulbeck/perl-modules/Shell-Cmd-3.00/t
+# SC_ORIG_DIRE=CURRDIR
 # export SC_VAR_1="val_1"
 # export SC_VAR_2="val_2"
 # SC_DIRE="/tmp"
 # cd "$SC_DIRE"
-# /home/sulbeck/perl-modules/Shell-Cmd-3.00/t/bin/succ 1 warn
+# TESTDIR/bin/succ 1 warn
 This is the 'succ' command stdout with argument: 1
-# /home/sulbeck/perl-modules/Shell-Cmd-3.00/t/bin/succ 2 warn
+# TESTDIR/bin/succ 2 warn
 This is the 'succ' command stdout with argument: 2
 # cd "$SC_ORIG_DIRE"
 

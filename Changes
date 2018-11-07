@@ -2,7 +2,7 @@ Written by:
    Sullivan Beck (sbeck@cpan.org)
 Any suggestions, bug reports, or donations :-) should be sent to me.
 
-3.00
+3.00  2018-11-07
    - Significant rewrite of including several backward incompatible
      changes.
      o  The return value of the run method (in run and script modes)
