@@ -1,0 +1,23 @@
+This is the 'succ' command stdout with argument: 1
+This is the 'fail' command stdout with argument: 1
+
+#****************************************
+# The following script failed at command 2
+SC_ORIG_DIRE=/home/sulbeck/perl-modules/Shell-Cmd-3.00/t;
+SC_DIRE=/home/sulbeck/perl-modules/Shell-Cmd-3.00/t;
+# 1 [Succ1]
+/home/sulbeck/perl-modules/Shell-Cmd-3.00/t/bin/succ 1 warn;
+# 2 [Fail1]
+/home/sulbeck/perl-modules/Shell-Cmd-3.00/t/bin/fail 1 warn;
+# 3 [Succ2]
+/home/sulbeck/perl-modules/Shell-Cmd-3.00/t/bin/succ 2 warn;
+# 4 [Fail2]
+/home/sulbeck/perl-modules/Shell-Cmd-3.00/t/bin/fail 2 warn;
+cd "TESTDIR";
+
+###STDERR
+This is the 'succ' command stderr with argument: 1
+This is the 'fail' command stderr with argument: 1
+
+###EXIT
+2
