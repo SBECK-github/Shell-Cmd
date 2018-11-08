@@ -80,7 +80,7 @@ main () {
       #
 
       if [ $SC_CURR_SUCC -eq 0 ]; then
-         TESTDIR/bin/fail_twice /home/sulbeck/perl-modules/Shell-Cmd-3.00/t;
+         TESTDIR/bin/fail_twice TESTDIR;
          CMD_EXIT=$?;
          if [ $CMD_EXIT -eq 0 ]; then
             SC_CURR_SUCC=1;
