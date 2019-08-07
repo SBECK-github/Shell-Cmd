@@ -1,23 +1,16 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
-my $script = 'cleanup';
-my $test   = $0;
-$test      =~ s,.*/,,;
-
+use warnings;
+use strict;
 use Test::Inter;
-$t = new Test::Inter "$test";
-$testdir = $t->testdir();
+$::ti = '';
+$::ti = new Test::Inter $0;
+require "script.pl";
 
-require "$testdir/script.pl";
-
-if ($ENV{'TI_NOCLEAN'}) {
-   $t->skip_all('Cleanup test ignored');
-   exit;
-}
-
-
-testScript($t,$script,$test,$testdir,
+testScript(
            'mode'   => 'run',
+           'dire'   => '/tmp',
+           'RUN'    => 'g/tmp_script=/a/path/that/does/not/exist',
           );
 
 #Local Variables:

@@ -1,16 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
-my $script = 'simple';
-my $test   = $0;
-$test      =~ s,.*/,,;
-
+use warnings;
+use strict;
 use Test::Inter;
-$t = new Test::Inter "$test";
-$testdir = $t->testdir();
+$::ti = '';
+$::ti = new Test::Inter $0;
+require "script.pl";
 
-require "$testdir/script.pl";
-
-testScript($t,$script,$test,$testdir,
+testScript(
            'mode'   => 'run',
            'dire'   => '/tmp',
            'env'    => [ qw(SC_VAR_1  val_1   SC_VAR_2  val_2) ],

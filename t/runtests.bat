@@ -1,6 +1,6 @@
-perl -I../lib 00-dire.t 1
-perl -I../lib 00-error.t 1
+perl -I../lib 00-error-run.t 1
 perl -I../lib 00-obj.t 1
+perl -I../lib 00-simple-dire.t 1
 perl -I../lib 01-simple-run-echo.t 1
 perl -I../lib 01-simple-run-merge.t 1
 perl -I../lib 01-simple-run-quiet.t 1
@@ -56,4 +56,5 @@ perl -I../lib 90-alt_retry-script.t 1
 perl -I../lib 90-fail-script.t 1
 perl -I../lib 90-for_fail-script.t 1
 perl -I../lib 90-simple-script.t 1
-perl -I../lib ZZ-cleanup.t 1
+perl -I../lib ZZ-cleanup-run.t 1
+perl -I../lib _version.t 1

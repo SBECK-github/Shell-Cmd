@@ -19,9 +19,14 @@ use Capture::Tiny qw(capture);
 our($cwd,$ret);
 
 sub testScript {
-   my ($ti,$script,$test,$testdir,@opts) = @_;
-   $test   =~ s/\.t$//;
-   $testdir=`cd $testdir; pwd`;
+   my (@opts) = @_;
+   my $test    = $0;
+   $test       =~ s,^.*/,,;
+   $test       =~ s/\.t$//;
+   $test       =~ /^..\-([^-]+)\-/;
+   my $script  = $1;
+   my $testdir = $::ti->testdir();
+   $testdir    = `cd $testdir; pwd`;
    chomp($testdir);
 
    ##
@@ -36,6 +41,10 @@ sub testScript {
    my $obj     = new Shell::Cmd;
    $ret        = '';
 
+   my %runopts;
+   my $tmp_script;
+   my $tmp_script_keep;
+
    while (@opts) {
       my $opt = shift(@opts);
       my $val = shift(@opts);
@@ -43,25 +52,52 @@ sub testScript {
       if ($opt eq 'env') {
          $obj->env(@$val);
 
+      } elsif ($opt eq 'RUN') {
+         my($o,$v) = split(/=/,$val);
+         $runopts{$o} = $v;
+
+      } elsif ($opt eq 'tmp_script') {
+         $tmp_script = $val;
+      } elsif ($opt eq 'tmp_script_keep') {
+         $tmp_script_keep = $val;
+
       } else {
          my $err = $obj->options($opt,$val);
 
          if ($err) {
-            $ti->skip_all("Invalid script option: $opt");
+            $::ti->skip_all("Invalid script option: $opt");
          }
       }
    }
 
-   $obj->options('tmp_script',"$testdir/$test.sh",'tmp_script_keep',1);
+   my @args;
+   if (defined($tmp_script)) {
+      push(@args,'tmp_script',$tmp_script);
+   } else {
+      push(@args,'tmp_script',"$testdir/$test.sh");
+   }
+   if (defined($tmp_script_keep)) {
+      push(@args,'tmp_script_keep',$tmp_script_keep);
+   } else {
+      push(@args,'tmp_script_keep',1);
+   }
+   $obj->options(@args);
 
    while (@cmds) {
       my $cmd  = shift(@cmds);
       my $opts = shift(@cmds);
+      my %opts = %$opts;
+      my @o    = keys(%opts);
+      my $err;
 
-      my $err  = $obj->cmd($cmd,$opts);
+      if (@o) {
+         $err  = $obj->cmd($cmd,$opts);
+      } else {
+         $err  = $obj->cmd($cmd);
+      }
 
       if ($err) {
-         $ti->skip_all("Invalid command option: $cmd");
+         $::ti->skip_all("Invalid command or option: $cmd");
          return;
       }
    }
@@ -92,19 +128,36 @@ sub testScript {
    ##
 
    if ($mode eq 'run') {
-      $ti->file(\&_runRun,'','',"$test.exp0",'',$obj);
+      _set_runopts($obj,%runopts);
+      $::ti->file(\&_runRun,'','',"$test.exp0",'',$obj);
    } elsif ($mode eq 'script') {
+      _set_runopts($obj,%runopts);
       $obj->run();
       return $obj;
    } else {
-      $ti->file(\&_dryRun,'','',"$test.exp0",'',$obj);
+      $::ti->file(\&_dryRun,'','',"$test.exp0",'',$obj);
    }
-   $ti->done_testing();
+   $::ti->done_testing();
    rename("$testdir/tmp_test_inter","$testdir/$test.out");
    if (! $ENV{TI_NOCLEAN}) {
       unlink("$testdir/$test.out");
       unlink("$testdir/$test.exp0");
       unlink("$testdir/$test.sh");
+   }
+}
+
+sub _set_runopts {
+   my($obj,%runopts) = @_;
+   foreach my $opt (keys %runopts) {
+      my @path = split(/\//,$opt);
+      my $ele  = pop(@path);
+      my $val  = $runopts{$opt};
+      my $ptr  = $obj;
+      while (@path) {
+         my $p = shift(@path);
+         $ptr  = $$ptr{$p};
+      }
+      $$ptr{$ele} = $val;
    }
 }
 

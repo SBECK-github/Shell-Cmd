@@ -22,10 +22,10 @@ LICENSE
 Makefile.PL
 MANIFEST			This list of files
 README
-t/00-dire.exp
-t/00-dire.t
-t/00-error.t
+t/00-error-run.t
 t/00-obj.t
+t/00-simple-dire.exp
+t/00-simple-dire.t
 t/01-simple-run-echo.exp
 t/01-simple-run-echo.t
 t/01-simple-run-merge.exp
@@ -132,6 +132,9 @@ t/90-alt_retry-script.t
 t/90-fail-script.t
 t/90-for_fail-script.t
 t/90-simple-script.t
+t/_pod.t
+t/_pod_coverage.t
+t/_version.t
 t/bin/always_succ
 t/bin/check_always_succ
 t/bin/check_false
@@ -140,8 +143,6 @@ t/bin/fail
 t/bin/fail_on_2
 t/bin/fail_twice
 t/bin/succ
-t/pod.t
-t/pod_coverage.t
 t/runtests
 t/runtests.bat
 t/scr/alt.scr
@@ -163,7 +164,7 @@ t/scr/special_characters.scr
 t/scr/until.scr
 t/scr/while.scr
 t/script.pl
-t/ZZ-cleanup.exp
-t/ZZ-cleanup.t
+t/ZZ-cleanup-run.exp
+t/ZZ-cleanup-run.t
 META.yml                                 Module YAML meta-data (added by MakeMaker)
 META.json                                Module JSON meta-data (added by MakeMaker)
