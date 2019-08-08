@@ -1466,47 +1466,70 @@ sub _script_output {
 
       ($cmd_next,$alt_next,$try_next,$exit_next,$alt) = @{ shift(@cmd_raw) };
 
-      # ALT_NEXT = 0/1    and
-      # TRY_NEXT = 0
-      #    new command
+      VALID_CONDITIONS: {
 
-      if ($alt_next <= 1  &&
-          $try_next == 0) {
+         ## ALT_NEXT = 0/1    and
+         ## TRY_NEXT = 0
+         ##    next command
+         ##
+         ## All valid CMD_NEXT != CMD_CURR entries will be covered here.
 
-         push(@cmd,[@try]);
-         push(@cmds,[$cmd_curr,$exit_curr,@cmd]);
-         @cmd      = ();
-         @try      = ($alt);
-         $cmd_curr = $cmd_next;
-         $alt_curr = $alt_next;
-         $try_curr = $try_next;
-         $exit_curr= $exit_next;
-         next COMMAND_LOOP;
-      }
+         if ($alt_next <= 1  &&
+             $try_next == 0) {
 
-      # CMD_NEXT = CMD_CURR     and
-      # ALT_NEXT = ALT_CURR+1   and
-      # TRY_NEXT = TRY_CURR
-      #    next alternate
+            push(@cmd,[@try]);
+            push(@cmds,[$cmd_curr,$exit_curr,@cmd]);
+            @cmd      = ();
+            @try      = ($alt);
+            $cmd_curr = $cmd_next;
+            $alt_curr = $alt_next;
+            $try_curr = $try_next;
+            $exit_curr= $exit_next;
+            next COMMAND_LOOP;
+         }
 
-      if ($cmd_next == $cmd_curr    &&
-          $alt_next == $alt_curr+1  &&
-          $try_next == $try_curr) {
+         # uncoverable branch true
+         if ($cmd_next != $cmd_curr) {
+            # uncoverable statement
+            last VALID_CONDITIONS;
+         }
 
-         push(@try,$alt);
-         $alt_curr = $alt_next;
-         $exit_curr= $exit_next;
-         next COMMAND_LOOP;
-      }
+         ## ALT_NEXT = ALT_CURR+1
+         ##    next alternate
+         ##
+         ## All valid entries will have TRY_NEXT = TRY_CURR
 
-      # CMD_NEXT = CMD_CURR  and
-      # ALT_NEXT = 0/1       and
-      # TRY_NEXT = TRY_CURR+1
-      #    next try
+         if ($alt_next == $alt_curr+1) {
 
-      if ($cmd_next == $cmd_curr    &&
-          $alt_next <= 1            &&
-          $try_next == $try_curr+1) {
+            # uncoverable branch true
+            if ($try_next != $try_curr) {
+               # uncoverable statement
+               last VALID_CONDITIONS;
+            }
+
+            push(@try,$alt);
+            $alt_curr = $alt_next;
+            $exit_curr= $exit_next;
+            next COMMAND_LOOP;
+         }
+
+         ## ALT_NEXT = 0/1       and
+         ## TRY_NEXT = TRY_CURR+1
+         ##    next try
+         ##
+         ## Everything left must have both of these conditions.
+
+         # uncoverable branch true
+         if ($alt_next > 1) {
+            # uncoverable statement
+            last VALID_CONDITIONS;
+         }
+
+         # uncoverable branch true
+         if ($try_next != $try_curr+1) {
+            # uncoverable statement
+            last VALID_CONDITIONS;
+         }
 
          push(@cmd,[@try]);
          @try      = ($alt);
@@ -1520,9 +1543,11 @@ sub _script_output {
       # Everything else is an error in the output (should never happen)
       #
 
+      # uncoverable statement
       $self->_err("Unexpected error in output: $i " .
                   "[$cmd_curr,$alt_curr,$try_curr] " .
                   "[$cmd_next,$alt_next,$try_next]");
+      # uncoverable statement
       return ();
    }
 
@@ -1575,6 +1600,7 @@ sub ssh {
       print $out $script;
       $out->close();
    } else {
+      $self->_err("tmp_script not writable");
       return 254;
    }
 
@@ -1620,8 +1646,10 @@ sub _ssh_parallel {
          my($pid,$exit_code,$id,$signal,$core_dump,$data) = @_;
          my($host,$exit,$stdout,$stderr) = @$data;
          $ret{$host} = $exit;
-         $$self{'s'}{$host}{'out'} = $self->_script_output($stdout)  if ($stdout);
-         $$self{'s'}{$host}{'err'} = $self->_script_output($stderr)  if ($stderr);
+         $$self{'s'}{$host}{'out'} = $self->_script_output($stdout)
+           if (defined $stdout);
+         $$self{'s'}{$host}{'err'} = $self->_script_output($stderr)
+           if (defined $stderr);
          $$self{'s'}{$host}{'exit'} = $exit;
       }
      );

@@ -16,18 +16,27 @@ use Shell::Cmd;
 use IO::File;
 use Capture::Tiny qw(capture);
 
-our($cwd,$ret);
+our($cwd,$ret,@ssh_hosts);
 
 sub testScript {
    my (@opts) = @_;
    my $test    = $0;
    $test       =~ s,^.*/,,;
    $test       =~ s/\.t$//;
-   $test       =~ /^..\-([^-]+)\-/;
-   my $script  = $1;
+   my @t       = split(/\-/,$test);
+   my $ssh     = ($t[0] =~ /s$/ ? 1 : 0);
+   my $script  = $t[1];
    my $testdir = $::ti->testdir();
    $testdir    = `cd $testdir; pwd`;
    chomp($testdir);
+
+   if ($ssh) {
+      if (! $ENV{'SSH_TESTING'}) {
+         $::ti->skip_all("SSH testing disabled.  Set SSH_TESTING to a list of hosts to enable.");
+         return;
+      }
+      @ssh_hosts = split(/\s+/,$ENV{'SSH_TESTING'});
+   }
 
    ##
    ## Create the object and add the commands from the script
@@ -43,6 +52,7 @@ sub testScript {
 
    my %runopts;
    my $tmp_script;
+   my $ssh_num = 1;
    my $tmp_script_keep;
 
    while (@opts) {
@@ -55,6 +65,12 @@ sub testScript {
       } elsif ($opt eq 'RUN') {
          my($o,$v) = split(/=/,$val);
          $runopts{$o} = $v;
+
+      } elsif ($opt eq 'SSH_no_hosts') {
+         @ssh_hosts = ();
+
+      } elsif ($opt eq 'ssh_num') {
+         $ssh_num   = $val;
 
       } elsif ($opt eq 'tmp_script') {
          $tmp_script = $val;
@@ -123,16 +139,64 @@ sub testScript {
       $out->close;
    }
 
+   # For SSH, we need to add some support for multiple hosts.
+   # A block of <HOST>...</HOST> will be repeated once for each
+   # host.
+
+   if ($ssh) {
+      my $in  = new IO::File;
+      my $out = new IO::File;
+      $in->open("$testdir/$test.exp0");
+      $out->open("> $testdir/$test.exp0s");
+      my @in = <$in>;
+      chomp(@in);
+
+      while (@in) {
+         my $line = shift(@in);
+         if ($line eq "<HOST>") {
+            my @tmp;
+            while (@in) {
+               my $l = shift(@in);
+               last  if ($l eq "</HOST>");
+               push(@tmp,$l);
+            }
+            foreach my $host (@ssh_hosts) {
+               foreach my $l (@tmp) {
+                  $l =~ s/HOST/$host/g;
+                  print $out "$l\n";
+               }
+            }
+         } else {
+            print $out "$line\n";
+         }
+      }
+
+      $in->close;
+      $out->close;
+
+      $obj->options('ssh_num'    => $ssh_num,
+                    'ssh_script' => "/tmp/ssh_cmd_$$.sh",
+                   );
+   }
+
    ##
    ## Now run it
    ##
 
    if ($mode eq 'run') {
       _set_runopts($obj,%runopts);
-      $::ti->file(\&_runRun,'','',"$test.exp0",'',$obj);
+      if ($ssh) {
+         $::ti->file(\&_runRun_ssh,'','',"$test.exp0s",'',$obj);
+      } else {
+         $::ti->file(\&_runRun,'','',"$test.exp0",'',$obj);
+      }
    } elsif ($mode eq 'script') {
       _set_runopts($obj,%runopts);
-      $obj->run();
+      if ($ssh) {
+         $obj->ssh();
+      } else {
+         $obj->run();
+      }
       return $obj;
    } else {
       $::ti->file(\&_dryRun,'','',"$test.exp0",'',$obj);
@@ -167,6 +231,24 @@ sub testScriptMode {
    $::obj->output(@args);
 }
 
+sub _runRun_ssh {
+   my($output,$obj) = @_;
+
+   my($stdout,$stderr,$exit) = capture {
+      $obj->ssh(@ssh_hosts);
+   };
+   $exit = $exit >> 8;
+
+   my $out = new IO::File;
+   $out->open(">$output");
+   print $out $stdout,"\n";
+   print $out "###STDERR\n";
+   print $out $stderr,"\n";
+   print $out "###EXIT\n";
+   print $out "$exit\n";
+   $out->close();
+}
+
 sub _runRun {
    my($output,$obj) = @_;
 
@@ -188,7 +270,12 @@ sub _runRun {
 sub _dryRun {
    my($output,$obj) = @_;
 
-   my $script = $obj->run();
+   my $script;
+   if (@ssh_hosts) {
+      $script = $obj->ssh(@ssh_hosts);
+   } else {
+      $script = $obj->run();
+   }
    my $out = new IO::File;
    $out->open(">$output");
    print $out $script,"\n";
