@@ -162,8 +162,9 @@ sub testScript {
             }
             foreach my $host (@ssh_hosts) {
                foreach my $l (@tmp) {
-                  $l =~ s/HOST/$host/g;
-                  print $out "$l\n";
+                  my $t = $l;
+                  $t =~ s/HOST/$host/g;
+                  print $out "$t\n";
                }
             }
          } else {

@@ -309,7 +309,9 @@ ERROR CODES
        201     If more than 200 commands are entered,
                and any of them beyond the 200th fail,
                the error code will be 201.
-       252     Flow commands not correctly nested/closed
+       252     An error in the script.  Usually this
+               indicates that flow commands not correctly
+               nested/closed.
        253     If the temporary script cannot
                be copied to a remote host (for use in
                the B<ssh> method), this is returned.
