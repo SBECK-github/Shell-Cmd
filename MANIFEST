@@ -77,7 +77,6 @@ t/01s-simplessh-fail2.t
 t/01s-simplessh-nohosts.exp
 t/01s-simplessh-nohosts.t
 t/01s-simplessh-run-opts.exp
-t/01s-simplessh-run-opts.exp0s
 t/01s-simplessh-run-opts.t
 t/01s-simplessh-run.exp
 t/01s-simplessh-run.t
