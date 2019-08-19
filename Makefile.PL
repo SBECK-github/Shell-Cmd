@@ -24,7 +24,7 @@ my %script_prereq = (
 );
 
 my %test_prereq = (
-   'Test::Inter'              => '0',
+   'Test::Inter'              => '1.09',
    'Test::More'               => '0',
 );
 
