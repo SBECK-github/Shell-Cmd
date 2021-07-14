@@ -25,7 +25,7 @@ use IO::File;
 use Cwd;
 
 our($VERSION);
-$VERSION = "3.04";
+$VERSION="3.05";
 
 $| = 1;
 $Data::Dumper::Sortkeys = 1;
