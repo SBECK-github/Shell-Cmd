@@ -812,6 +812,67 @@ entered if accurate error tracking is needed.
 
 =back
 
+=head1 BUGS AND QUESTIONS
+
+If you find a bug in Shell::Cmd, there are three ways to send it to me.
+In order of preference, they are:
+
+=over 4
+
+=item GitHub
+
+You can submit it as an issue on GitHub.  This can be done at the following
+URL:
+
+L<https://github.com/SBECK-github/Shell-Cmd>
+
+This is the preferred method.  Please submit problems requests as GitHub issues
+if at all possible.
+
+=item Direct email
+
+You are welcome to send it directly to me by email.  The email address
+to use is:  sbeck@cpan.org.
+
+Please note that because cpan.org addresses are published, they are used by
+a lot of spammers and phishers.  Please include the name of the perl module
+in the subject line of ALL messages sent to my cpan.org address or it will
+likely be missed.
+
+=item CPAN Bug Tracking
+
+You can submit it using the CPAN tracking tool.  This can be done at the
+following URL:
+
+L<http://rt.cpan.org/Public/Dist/Display.html?Name=Shell-Cmd>
+
+There was discussion of halting this service a while back (though it continues
+to function), so only use this as a last resort.
+
+=back
+
+Please do not use other means to report bugs (such as forums for a specific
+OS or Linux distribution) as it is impossible for me to keep up with all of
+them.  These are the current methods that are guaranteed to notify me.
+
+When filing a bug report, please include the following information:
+
+=over 4
+
+=item B<Shell::Cmd version>
+
+Please include the version of Shell::Cmd you are using.  You can get
+this by using the script:
+
+   use Shell::Cmd;
+   print $Shell::Cmd::VERSION,"\n";
+
+=back
+
+If you find any problems with the documentation (errors, typos, or items
+that are not clear), please send them to me. I welcome any suggestions
+that will allow me to improve the documentation.
+
 =head1 LICENSE
 
 This script is free software; you can redistribute it and/or
