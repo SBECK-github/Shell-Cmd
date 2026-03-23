@@ -2,8 +2,10 @@
 
 use Shell::Cmd;
 $obj = new Shell::Cmd;
-$obj->options("echo" => "echo");
-$obj->options("mode" => "dry-run");
+$obj->options("echo"   => "echo");
+$obj->options("mode"   => "dry-run");
+$obj->options("script" => "script");
+
 $obj->cmd("if [ -d /tmp/1 ]; then",
           "echo 'case 1'", { 'label' => "Echo case 1" },
           "elif [ -d /tmp/2 ]; then",
